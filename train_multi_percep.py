@@ -6,12 +6,14 @@
 #    By: msukhare <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2018/08/06 16:36:59 by msukhare          #+#    #+#              #
-#    Updated: 2018/08/07 10:57:12 by msukhare         ###   ########.fr        #
+#    Updated: 2018/08/10 16:52:50 by msukhare         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 import pandas as pd
+import matplotlib.pyplot as plt
 import numpy as np
+from math import floor
 import sys
 
 def check_argv():
@@ -48,61 +50,73 @@ def scaling_feat(data):
 def sigmoid(z):
     return (1 / (1 + np.exp(-z)))
 
-def forward_prop(X, thetas1, thetas2, thetas3):
-    l2 = sigmoid(np.dot(thetas1, X))
-    l3 = sigmoid(np.dot(thetas2, l2))
-    return (sigmoid(np.dot(thetas3, l3)))
+def forward_prop(X, thetas1, thetas2, thetas3, bias1, bias2, bias3):
+    l1 = sigmoid(thetas1.dot(X.transpose()) + bias1)
+    l2 = sigmoid(thetas2.dot(l1) + bias2)
+    return (sigmoid(thetas3.dot(l2) + bias3))
 
-def get_summ(X, Y, thetas1, thetas2, thetas3, m):
-    summ = 0
+def sum_mat(dlayer):
+    row = dlayer.shape[0]
+    col = dlayer.shape[1]
+    ret = np.zeros((row, 1), dtype=float)
+    for i in range(int(row)):
+        for j in range(int(col)):
+            ret[i][0] += dlayer[i][j]
+    return (ret)
+#dbias3 = ((1 / m) * sum_mat(dlayer3))
+
+def back_prop(X, Y, thetas1, thetas2, thetas3, bias1, bias2, bias3, m):
+    l1 = sigmoid(thetas1.dot(X.transpose()) + bias1)
+    l2 = sigmoid(thetas2.dot(l1) + bias2)
+    l3 = sigmoid(thetas3.dot(l2) + bias3)
+    dlayer3 = l3 - Y.transpose()
+    dlayer2 = ((thetas3.transpose().dot(dlayer3)) * (l2 * (1 - l2)))
+    dlayer1 = ((thetas2.transpose().dot(dlayer2)) * (l1 * (1 - l1)))
+    dtethas3 = ((1 / m) * (dlayer3.dot(l2.transpose())))
+    dtethas2 = ((1 / m) * (dlayer2.dot(l1.transpose())))
+    dtethas1 = ((1 / m) * (dlayer1.dot(X)))
+    dbias3 = np.sum(dlayer3, axis=1, keepdims=True)
+    dbias2 = np.sum(dlayer2, axis=1, keepdims=True)
+    dbias1 = np.sum(dlayer2, axis=1, keepdims=True)
+    thetas1 -= (0.0000000000001 * dtethas1)
+    thetas2 -= (0.0000000000001 * dtethas2)
+    thetas3 -= (0.0000000000001 * dtethas3)
+    bias1 -= (0.0000000000001 * dbias1)
+    bias2 -= (0.0000000000001 * dbias2)
+    bias3 -= (0.0000000000001 * dbias3)
+
+def cost_fct(X, Y, thetas1, thetas2, thetas3, bias1, bias2, bias3, m):
+    sum = 0
+    predict = forward_prop(X, thetas1, thetas2, thetas3, bias1, bias2, bias3)
     for i in range(int(m)):
         if (Y[i] == 1):
-            summ += np.log(forward_prop(X[i], thetas1, thetas2, thetas3))
+            sum += np.log(predict[0][i])
         else:
-            summ += np.log(1 - forward_prop(X[i], thetas1, thetas2, thetas3))
-    return (summ)
-
-def cost_fct(X, Y, thetas1, thetas2, thetas3):
-    m = X.shape[0]
-    return (-(1 / m) * get_summ(X, Y, thetas1, thetas2, thetas3, m))
-
-def back_prop(X, Y, thetas1, thetas2, thetas3):
-    m = X.shape[0]
-    capital_greek1 = np.zeros((36, 31), dtype=float)
-    capital_greek2 = np.zeros((36, 36), dtype=float)
-    capital_greek3 = np.zeros((1, 36), dtype=float)
-    for i in range(int(m)):
-        l1 = X[i]
-        l2 = sigmoid(np.dot(thetas1, l1))
-        l3 = sigmoid(np.dot(thetas2, l2))
-        l4 = sigmoid(np.dot(thetas3, l3))
-        lower_case_delta4 = l4 - Y[i]
-        lower_case_delta3 = (thetas3.transpose().dot(lower_case_delta4)).dot(l3) * (1 - l3)
-        lower_case_delta2 = (thetas2.transpose().dot(lower_case_delta3)).dot(l2) * (1 - l2)
-        lower_case_delta2 = np.reshape(lower_case_delta2, (36, 1))
-        lower_case_delta3 = np.reshape(lower_case_delta3, (36, 1))
-        lower_case_delta4 = np.reshape(lower_case_delta4, (1, 1))
-        l1 = np.reshape(l1, (1, 31))
-        capital_greek1 += lower_case_delta2.dot(l1)
-        l2 = np.reshape(l2, (1, 36))
-        capital_greek2 += lower_case_delta3.dot(l2)
-        l3 = np.reshape(l3, (1, 36))
-        capital_greek3 += lower_case_delta4.dot(l3)
-    capital_greek1 = 1 / m * capital_greek1
-    capital_greek2 = 1 / m * capital_greek2
-    capital_greek3 = 1 / m * capital_greek3
-    return (capital_greek1, capital_greek2, capital_greek3)
+            sum += np.log(1 - predict[0][i])
+    return (-(1 / m) * sum)
 
 def main():
     check_argv()
     data, Y = read_file()
     X = scaling_feat(data)
+    m = X.shape[0]
     epsilon = 0.01
     thetas1 = (np.random.rand(36, X.shape[1]) * (2 * epsilon) - epsilon)
     thetas2 = (np.random.rand(36, 36) * (2 * epsilon) - epsilon)
     thetas3 = (np.random.rand(1, 36) * (2 * epsilon) - epsilon)
-    cost_fct(X, Y, thetas1, thetas2, thetas3)
-    cap1, cap2, cap3 = back_prop(X, Y, thetas1, thetas2, thetas3)
+    bias1 = (np.random.rand(36, 1) * (2 * epsilon) - epsilon)
+    bias2 = (np.random.rand(36, 1) * (2 * epsilon) - epsilon)
+    bias3 = (np.random.rand(1, 1) * (2 * epsilon) - epsilon)
+    res_cost = []
+    index = []
+    for i in range(2000):
+        back_prop(X, Y, thetas1, thetas2, thetas3, bias1, bias2, bias3, m)
+        index.append(i)
+        res_cost.append(cost_fct(X, Y, thetas1, thetas2, thetas3, bias1, bias2, bias3, m))
+    plt.plot(index, res_cost, color='red')
+    plt.show()
+    print(forward_prop(X, thetas1, thetas2, thetas3, bias1, bias2, bias3))
+
 
 if (__name__ == "__main__"):
     main()
