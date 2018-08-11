@@ -6,7 +6,7 @@
 #    By: msukhare <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2018/08/06 16:36:59 by msukhare          #+#    #+#              #
-#    Updated: 2018/08/10 16:52:50 by msukhare         ###   ########.fr        #
+#    Updated: 2018/08/11 16:57:04 by msukhare         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -50,44 +50,44 @@ def scaling_feat(data):
 def sigmoid(z):
     return (1 / (1 + np.exp(-z)))
 
-def forward_prop(X, thetas1, thetas2, thetas3, bias1, bias2, bias3):
-    l1 = sigmoid(thetas1.dot(X.transpose()) + bias1)
-    l2 = sigmoid(thetas2.dot(l1) + bias2)
-    return (sigmoid(thetas3.dot(l2) + bias3))
+def tanh(z):
+    return ((np.exp(z) - np.exp(-z) / (np.exp(z) + np.exp(-z))))
 
-def sum_mat(dlayer):
-    row = dlayer.shape[0]
-    col = dlayer.shape[1]
-    ret = np.zeros((row, 1), dtype=float)
-    for i in range(int(row)):
-        for j in range(int(col)):
-            ret[i][0] += dlayer[i][j]
-    return (ret)
-#dbias3 = ((1 / m) * sum_mat(dlayer3))
+def forward_prop(X, thetas1, thetas2, thetas3, thetas4, bias1, bias2, bias3, bias4):
+    l1 = tanh(thetas1.dot(X.transpose()) + bias1)
+    l2 = tanh(thetas2.dot(l1) + bias2)
+    l3 = tanh(thetas3.dot(l1) + bias3)
+    return (sigmoid(thetas4.dot(l3) + bias4))
 
-def back_prop(X, Y, thetas1, thetas2, thetas3, bias1, bias2, bias3, m):
-    l1 = sigmoid(thetas1.dot(X.transpose()) + bias1)
-    l2 = sigmoid(thetas2.dot(l1) + bias2)
-    l3 = sigmoid(thetas3.dot(l2) + bias3)
-    dlayer3 = l3 - Y.transpose()
-    dlayer2 = ((thetas3.transpose().dot(dlayer3)) * (l2 * (1 - l2)))
-    dlayer1 = ((thetas2.transpose().dot(dlayer2)) * (l1 * (1 - l1)))
+def back_prop(X, Y, thetas1, thetas2, thetas3, thetas4, bias1, bias2, bias3, bias4, m):
+    l1 = tanh(thetas1.dot(X.transpose()) + bias1)
+    l2 = tanh(thetas2.dot(l1) + bias2)
+    l3 = tanh(thetas3.dot(l2) + bias3)
+    l4 = sigmoid(thetas4.dot(l3) + bias4)
+    dlayer4 = l4 - Y.transpose()
+    dlayer3 = ((thetas4.transpose().dot(dlayer4)) * (1 - (tanh(l3))**2))#(l2 * (1 - l2))) Dsigmoid
+    dlayer2 = ((thetas3.transpose().dot(dlayer3)) * (1 - (tanh(l2))**2))#(l1 * (1 - l1))) Dsigmoid
+    dlayer1 = ((thetas2.transpose().dot(dlayer2)) * (1 - (tanh(l1))**2))#(l1 * (1 - l1))) Dsigmoid
+    dtethas4 = ((1 / m) * (dlayer4.dot(l3.transpose())))
     dtethas3 = ((1 / m) * (dlayer3.dot(l2.transpose())))
     dtethas2 = ((1 / m) * (dlayer2.dot(l1.transpose())))
     dtethas1 = ((1 / m) * (dlayer1.dot(X)))
+    dbias4 = np.sum(dlayer4, axis=1, keepdims=True)
     dbias3 = np.sum(dlayer3, axis=1, keepdims=True)
     dbias2 = np.sum(dlayer2, axis=1, keepdims=True)
-    dbias1 = np.sum(dlayer2, axis=1, keepdims=True)
-    thetas1 -= (0.0000000000001 * dtethas1)
-    thetas2 -= (0.0000000000001 * dtethas2)
-    thetas3 -= (0.0000000000001 * dtethas3)
-    bias1 -= (0.0000000000001 * dbias1)
-    bias2 -= (0.0000000000001 * dbias2)
-    bias3 -= (0.0000000000001 * dbias3)
+    dbias1 = np.sum(dlayer1, axis=1, keepdims=True)
+    thetas1 -= (0.001 * dtethas1)
+    thetas2 -= (0.001 * dtethas2)
+    thetas3 -= (0.001 * dtethas3)
+    thetas4 -= (0.001 * dtethas4)
+    bias1 -= (0.001 * dbias1)
+    bias2 -= (0.001 * dbias2)
+    bias3 -= (0.001 * dbias3)
+    bias4 -= (0.001 * dbias4)
 
-def cost_fct(X, Y, thetas1, thetas2, thetas3, bias1, bias2, bias3, m):
+def cost_fct(X, Y, thetas1, thetas2, thetas3, thetas4, bias1, bias2, bias3, bias4, m):
     sum = 0
-    predict = forward_prop(X, thetas1, thetas2, thetas3, bias1, bias2, bias3)
+    predict = forward_prop(X, thetas1, thetas2, thetas3, thetas4, bias1, bias2, bias3, bias4)
     for i in range(int(m)):
         if (Y[i] == 1):
             sum += np.log(predict[0][i])
@@ -95,28 +95,41 @@ def cost_fct(X, Y, thetas1, thetas2, thetas3, bias1, bias2, bias3, m):
             sum += np.log(1 - predict[0][i])
     return (-(1 / m) * sum)
 
+def gradient_check(X, Y, thetas1, thetas2, thetas3, thetas4, bias1, bias2, bias3, bias4, m):
+    res_minus = cost_fct(X, Y, (thetas1 - 0.001), (thetas2 - 0.001), (thetas3 - 0.001), (thetas4 - 0.001), (bias1 - 0.001), (bias2 - 0.001), (bias3 - 0.001), (bias4 - 0.001), m)
+    res_plus = cost_fct(X, Y, (thetas1 + 0.001), (thetas2 + 0.001), (thetas3 + 0.001), (thetas4 + 0.001), (bias1 + 0.001), (bias2 + 0.001), (bias3 + 0.001), (bias4 + 0.001), m)
+    res_check = ((res_plus - res_minus) / (2 * 0.001))
+    print(cost_fct(X, Y, thetas1, thetas2, thetas3, thetas4, bias1, bias2, bias3, bias4, m))
+    print(res_check)
+    sys.exit()
+
 def main():
     check_argv()
     data, Y = read_file()
     X = scaling_feat(data)
     m = X.shape[0]
-    epsilon = 0.01
+    epsilon = 0.001
     thetas1 = (np.random.rand(36, X.shape[1]) * (2 * epsilon) - epsilon)
     thetas2 = (np.random.rand(36, 36) * (2 * epsilon) - epsilon)
-    thetas3 = (np.random.rand(1, 36) * (2 * epsilon) - epsilon)
+    thetas3 = (np.random.rand(36, 36) * (2 * epsilon) - epsilon)
+    thetas4 = (np.random.rand(1, 36) * (2 * epsilon) - epsilon)
     bias1 = (np.random.rand(36, 1) * (2 * epsilon) - epsilon)
     bias2 = (np.random.rand(36, 1) * (2 * epsilon) - epsilon)
-    bias3 = (np.random.rand(1, 1) * (2 * epsilon) - epsilon)
+    bias3 = (np.random.rand(36, 1) * (2 * epsilon) - epsilon)
+    bias4 = (np.random.rand(1, 1) * (2 * epsilon) - epsilon)
+    back_prop(X, Y, thetas1, thetas2, thetas3, thetas4, bias1, bias2, bias3, bias4, m)
+    gradient_check(X, Y, thetas1, thetas2, thetas3, thetas4, bias1, bias2, bias3, bias4, m)
     res_cost = []
     index = []
-    for i in range(2000):
-        back_prop(X, Y, thetas1, thetas2, thetas3, bias1, bias2, bias3, m)
+    for i in range(20):
+        back_prop(X, Y, thetas1, thetas2, thetas3, thetas4, bias1, bias2, bias3, bias4, m)
         index.append(i)
-        res_cost.append(cost_fct(X, Y, thetas1, thetas2, thetas3, bias1, bias2, bias3, m))
+        res_cost.append(cost_fct(X, Y, thetas1, thetas2, thetas3, thetas4, bias1, bias2, bias3, bias4, m))
     plt.plot(index, res_cost, color='red')
     plt.show()
-    print(forward_prop(X, thetas1, thetas2, thetas3, bias1, bias2, bias3))
-
+    pred = forward_prop(X, thetas1, thetas2, thetas3, thetas4, bias1, bias2, bias3, bias4)
+    for i in range(int(m)):
+        print(pred[0][i], Y[i])
 
 if (__name__ == "__main__"):
     main()
