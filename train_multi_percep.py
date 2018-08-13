@@ -6,7 +6,7 @@
 #    By: msukhare <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2018/08/06 16:36:59 by msukhare          #+#    #+#              #
-#    Updated: 2018/08/12 21:39:00 by kemar            ###   ########.fr        #
+#    Updated: 2018/08/13 16:52:15 by msukhare         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -174,11 +174,11 @@ def back_prop_sbs(X, Y, thetas1, thetas2, thetas3, thetas4, bias1, bias2, bias3,
 
 def make_regu1(thetas1, thetas2, m):
     sum = 0
-    for i in range(10):
+    for i in range(13):
         for j in range(31):
             sum += (thetas1[i][j])**2
     for i in range(1):
-        for j in range(10):
+        for j in range(13):
             sum += (thetas2[i][j])**2
     return (((0.0001 / (2 * m) * sum)))
 
@@ -197,10 +197,68 @@ def cost_fct_sbs1(X, Y, thetas1, thetas2, bias1, bias2, m):
     regu = make_regu1(thetas1, thetas2, m)
     return ((-(1 / m) * sum + regu))
 
+def gradient_checkt(X, Y, thetas1, thetas2, bias1, bias2, dthetas1, dthetas2, dbias1, dbias2, ep, m):
+    dthetas1 = np.reshape(dthetas1.ravel(), (403, 1))
+    dthetas2 = np.reshape(dthetas2.ravel(), (13, 1))
+    dbias1 = np.reshape(dbias1.ravel(), (13, 1))
+    dbias2 = np.reshape(dbias2.ravel(), (1, 1))
+    bigthetas = np.zeros((430, 1), dtype=float)
+    bigdthetas = np.concatenate((dthetas1, dthetas2, dbias1, dbias2))
+    k = 0
+    for i in range(13):
+        for j in range(31):
+                tmp = thetas1[i][j]
+                thetas1[i][j] += ep
+                res_plus = cost_fct_sbs1(X, Y, thetas1, thetas2, bias1, bias2, m)
+                thetas1[i][j] = tmp
+                tmp = thetas1[i][j]
+                thetas1[i][j] -= ep
+                res_minus = cost_fct_sbs1(X, Y, thetas1, thetas2, bias1, bias2, m)
+                thetas1[i][j] = tmp
+                bigthetas[k][0] = ((res_plus - res_minus) / ( 2 * ep))
+                k += 1
+    for i in range(1):
+        for j in range(13):
+                tmp = thetas2[i][j]
+                thetas2[i][j] += ep
+                res_plus = cost_fct_sbs1(X, Y, thetas1, thetas2, bias1, bias2, m)
+                thetas2[i][j] = tmp
+                tmp = thetas2[i][j]
+                thetas2[i][j] -= ep
+                res_minus = cost_fct_sbs1(X, Y, thetas1, thetas2, bias1, bias2, m)
+                thetas2[i][j] = tmp
+                bigthetas[k][0] = ((res_plus - res_minus) / ( 2 * ep))
+                k += 1
+    for i in range(13):
+        for j in range(1):
+                tmp = bias1[i][j]
+                bias1[i][j] += ep
+                res_plus = cost_fct_sbs1(X, Y, thetas1, thetas2, bias1, bias2, m)
+                bias1[i][j] = tmp
+                tmp = bias1[i][j]
+                bias1[i][j] -= ep
+                res_minus = cost_fct_sbs1(X, Y, thetas1, thetas2, bias1, bias2, m)
+                bias1[i][j] = tmp
+                bigthetas[k][0] = ((res_plus - res_minus) / ( 2 * ep))
+                k += 1
+    for i in range(1):
+        for j in range(1):
+                tmp = bias2[i][j]
+                bias2[i][j] += ep
+                res_plus = cost_fct_sbs1(X, Y, thetas1, thetas2, bias1, bias2, m)
+                bias2[i][j] = tmp
+                tmp = bias2[i][j]
+                bias2[i][j] -= ep
+                res_minus = cost_fct_sbs1(X, Y, thetas1, thetas2, bias1, bias2, m)
+                bias2[i][j] = tmp
+                bigthetas[k][0] = ((res_plus - res_minus) / ( 2 * ep))
+                k += 1
+
+
 def back_prop_sbs1(X, Y, thetas1, thetas2, bias1, bias2, m):
-    dthetas1 = np.zeros((10, 31), dtype=float)
-    dthetas2 = np.zeros((1, 10), dtype=float)
-    dbias1 = np.zeros((10, 1), dtype=float)
+    dthetas1 = np.zeros((13, 31), dtype=float)
+    dthetas2 = np.zeros((1, 13), dtype=float)
+    dbias1 = np.zeros((13, 1), dtype=float)
     dbias2 = np.zeros((1, 1), dtype=float)
     for i in range(int(m)):
         l1 = np.reshape(X[i], (31, 1))
@@ -212,18 +270,21 @@ def back_prop_sbs1(X, Y, thetas1, thetas2, bias1, bias2, m):
         dthetas2 += dlayer3.dot(l2.transpose())
         dbias2 += np.sum(dlayer3, axis=1, keepdims=True)
         dbias1 += np.sum(dlayer2, axis=1, keepdims=True)
-    thetas1 -= ((1 / m) * (0.1 * dthetas1) + (0.0001 * thetas1)) 
-    thetas2 -= ((1 / m) * (0.1 * dthetas2) + (0.0001 * thetas2))
-    bias1 -= ((1 / m) * (0.1 * dbias1))
-    bias2 -= ((1 / m) * (0.1 * dbias2))
+    dthetas1 = (((1 / m) * dthetas1) + (0.0001 * thetas1))
+    dthetas2 = (((1 / m) * dthetas2) + (0.0001 * thetas2))
+    dbias1 = ((1 / m) * dbias1)
+    dbias2 = ((1 / m) * dbias2)
+    gradient_checkt(X, Y, thetas1, thetas2, bias1, bias2, dthetas1, dthetas2, bias1, bias2, 0.0001, m)
+    return ((thetas1 - (0.9 * dthetas1)), (thetas2 - (0.9 * dthetas2)), (bias1 - (0.9 * dbias1)), (bias2 - (0.9 * dbias2)))
 
-def gradient_check1(X, Y, thetas1, thetas2, bias1, bias2, m):
-    res_minus = cost_fct_sbs1(X, Y, (thetas1 - 0.0001), (thetas2 - 0.0001), (bias1 - 0.0001), (bias2 - 0.0001), m)
-    res_plus = cost_fct_sbs1(X, Y, (thetas1 + 0.0001), (thetas2 + 0.0001), (bias1 + 0.0001), (bias2 + 0.0001), m)
-    res_check = ((res_plus - res_minus) / (2 * 0.0001))
+def gradient_check1(X, Y, thetas1, thetas2, bias1, bias2, m, ep):
+    res_minus = cost_fct_sbs1(X, Y, (thetas1 - ep), (thetas2 - ep), (bias1 - ep), (bias2 - ep), m)
+    res_plus = cost_fct_sbs1(X, Y, (thetas1 + ep), (thetas2 + ep), (bias1 + ep), (bias2 + ep), m)
+    res_check = ((res_plus - res_minus) / (2 * ep))
     print(cost_fct_sbs1(X, Y, thetas1, thetas2, bias1, bias2, m))
     print(res_check)
     sys.exit()
+
 
 def main():
     check_argv()
@@ -231,26 +292,30 @@ def main():
     X = scaling_feat(data)
     m = X.shape[0]
     epsilon = 0.0001
-    thetas1 = (np.random.rand(10, X.shape[1]) * (2 * epsilon) - epsilon)
+    thetas1 = (np.random.rand(13, X.shape[1]) * (2 * epsilon) - epsilon)
     #thetas2 = (np.random.rand(36, 36) * (2 * epsilon) - epsilon)
-    thetas2 = (np.random.rand(1, 10) * (2 * epsilon) - epsilon)
+    thetas2 = (np.random.rand(1, 13) * (2 * epsilon) - epsilon)
     #thetas3 = (np.random.rand(36, 36) * (2 * epsilon) - epsilon)
     #thetas4 = (np.random.rand(1, 36) * (2 * epsilon) - epsilon)
-    bias1 = (np.random.rand(10, 1) * (2 * epsilon) - epsilon)
+    bias1 = (np.random.rand(13, 1) * (2 * epsilon) - epsilon)
     #bias2 = (np.random.rand(36, 1) * (2 * epsilon) - epsilon)
     bias2 = (np.random.rand(1, 1) * (2 * epsilon) - epsilon)
     #bias3 = (np.random.rand(36, 1) * (2 * epsilon) - epsilon)
     #bias4 = (np.random.rand(1, 1) * (2 * epsilon) - epsilon)
     #back_prop_sbs(X, Y, thetas1, thetas2, thetas3, thetas4, bias1, bias2, bias3, bias4, m)
-    #back_prop_sbs1(X, Y, thetas1, thetas2, bias1, bias2, m)
-    #gradient_check1(X, Y, thetas1, thetas2, bias1, bias2, m)
+    thetas1, thetas2, bias1, bias2 = back_prop_sbs1(X, Y, thetas1, thetas2, bias1, bias2, m)
+   # gradient_check1(X, Y, thetas1, thetas2, bias1, bias2, m, epsilon)
     #back_prop(X, Y, thetas1, thetas2, thetas3, thetas4, bias1, bias2, bias3, bias4, m)
    # gradient_check(X, Y, thetas1, thetas2, thetas3, thetas4, bias1, bias2, bias3, bias4, m)
     res_cost = []
     index = []
-    for i in range(255):
+    for i in range(10):
         #back_prop_sbs(X, Y, thetas1, thetas2, thetas3, thetas4, bias1, bias2, bias3, bias4, m)
-        back_prop_sbs1(X, Y, thetas1, thetas2, bias1, bias2, m)
+        #print(thetas1[0],"\n")
+        #print(thetas2,"\n")
+        #print(bias1,"\n")
+        print(bias2,"\n")
+        thetas1, thetas2, bias1, bias2 = back_prop_sbs1(X, Y, thetas1, thetas2, bias1, bias2, m)
         index.append(i)
         res_cost.append(cost_fct_sbs1(X, Y, thetas1, thetas2, bias1, bias2, m))
     plt.plot(index, res_cost, color='red')
@@ -258,9 +323,9 @@ def main():
    # pred = forward_prop(X, thetas1, thetas2, thetas3, thetas4, bias1, bias2, bias3, bias4)
    # for i in range(int(m)):
    #     print(pred[0][i], Y[i])
-    for i in range(int(m)):
+   # for i in range(int(m)):
         #print(forward_prop_sbs(X[i], thetas1, thetas2, thetas3, thetas4, bias1, bias2, bias3, bias4), Y[i])
-        print(forward_prop_sbs1(X[i], thetas1, thetas2, bias1, bias2), Y[i])
+    #    print(forward_prop_sbs1(X[i], thetas1, thetas2, bias1, bias2), Y[i])
 
 if (__name__ == "__main__"):
     main()
