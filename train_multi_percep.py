@@ -6,7 +6,7 @@
 #    By: msukhare <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2018/08/06 16:36:59 by msukhare          #+#    #+#              #
-#    Updated: 2018/08/13 16:52:15 by msukhare         ###   ########.fr        #
+#    Updated: 2018/08/14 16:30:20 by msukhare         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -194,8 +194,8 @@ def cost_fct_sbs1(X, Y, thetas1, thetas2, bias1, bias2, m):
             sum += np.log(forward_prop_sbs1(X[i], thetas1, thetas2, bias1, bias2))
         else:
             sum += np.log(1 - (forward_prop_sbs1(X[i], thetas1, thetas2, bias1, bias2)))
-    regu = make_regu1(thetas1, thetas2, m)
-    return ((-(1 / m) * sum + regu))
+   # regu = make_regu1(thetas1, thetas2, m)
+    return ((-(1 / m) * sum))# + regu))
 
 def gradient_checkt(X, Y, thetas1, thetas2, bias1, bias2, dthetas1, dthetas2, dbias1, dbias2, ep, m):
     dthetas1 = np.reshape(dthetas1.ravel(), (403, 1))
@@ -253,7 +253,26 @@ def gradient_checkt(X, Y, thetas1, thetas2, bias1, bias2, dthetas1, dthetas2, db
                 bias2[i][j] = tmp
                 bigthetas[k][0] = ((res_plus - res_minus) / ( 2 * ep))
                 k += 1
-
+    sum1 = 0
+    for i in range(430):
+        sum1 += (bigthetas[i][0] - bigdthetas[i][0])**2
+    sum1 = np.sqrt(sum1)
+    sum2 = 0
+    for i in range(430):
+        sum2 += (bigthetas[i][0])**2
+    sum2 = np.sqrt(sum2)
+    sum3 = 0
+    for i in range(430):
+        sum3 += (bigdthetas[i][0])**2
+    sum3 = np.sqrt(sum3)
+    res = (sum1 / sum2 + sum3)
+    print(res)
+    sum1 = np.sqrt(np.sum(pow(bigthetas - bigdthetas, 2)))
+    sum2 = np.sqrt(np.sum(pow(bigthetas, 2)))
+    sum3 = np.sqrt(np.sum(pow(bigdthetas, 2)))
+    res = (sum1 / sum2 + sum3)
+    print(res)
+    sys.exit()
 
 def back_prop_sbs1(X, Y, thetas1, thetas2, bias1, bias2, m):
     dthetas1 = np.zeros((13, 31), dtype=float)
@@ -270,12 +289,16 @@ def back_prop_sbs1(X, Y, thetas1, thetas2, bias1, bias2, m):
         dthetas2 += dlayer3.dot(l2.transpose())
         dbias2 += np.sum(dlayer3, axis=1, keepdims=True)
         dbias1 += np.sum(dlayer2, axis=1, keepdims=True)
-    dthetas1 = (((1 / m) * dthetas1) + (0.0001 * thetas1))
-    dthetas2 = (((1 / m) * dthetas2) + (0.0001 * thetas2))
+    dthetas1 = (((1 / m) * dthetas1))# + (0.0001 * thetas1))
+    dthetas2 = (((1 / m) * dthetas2))# + (0.0001 * thetas2))
     dbias1 = ((1 / m) * dbias1)
     dbias2 = ((1 / m) * dbias2)
-    gradient_checkt(X, Y, thetas1, thetas2, bias1, bias2, dthetas1, dthetas2, bias1, bias2, 0.0001, m)
-    return ((thetas1 - (0.9 * dthetas1)), (thetas2 - (0.9 * dthetas2)), (bias1 - (0.9 * dbias1)), (bias2 - (0.9 * dbias2)))
+    thetas1 = (thetas1 - (0.0009 * dthetas1))
+    thetas2 = (thetas2 - (0.0009 * dthetas2))
+    bias1 = (bias1 - (0.0009 * dbias1))
+    bias2 = (bias2 - (0.0009 * dbias2))
+    gradient_checkt(X, Y, thetas1, thetas2, bias1, bias2, dthetas1, dthetas2, bias1, bias2, 0.0000001, m)
+    return (thetas1, thetas2, bias1, bias2)
 
 def gradient_check1(X, Y, thetas1, thetas2, bias1, bias2, m, ep):
     res_minus = cost_fct_sbs1(X, Y, (thetas1 - ep), (thetas2 - ep), (bias1 - ep), (bias2 - ep), m)
@@ -291,7 +314,7 @@ def main():
     data, Y = read_file()
     X = scaling_feat(data)
     m = X.shape[0]
-    epsilon = 0.0001
+    epsilon = 0.0000001
     thetas1 = (np.random.rand(13, X.shape[1]) * (2 * epsilon) - epsilon)
     #thetas2 = (np.random.rand(36, 36) * (2 * epsilon) - epsilon)
     thetas2 = (np.random.rand(1, 13) * (2 * epsilon) - epsilon)
