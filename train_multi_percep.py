@@ -6,7 +6,7 @@
 #    By: msukhare <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2018/08/06 16:36:59 by msukhare          #+#    #+#              #
-#    Updated: 2018/08/14 16:30:20 by msukhare         ###   ########.fr        #
+#    Updated: 2018/08/14 17:17:33 by msukhare         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -244,11 +244,15 @@ def gradient_checkt(X, Y, thetas1, thetas2, bias1, bias2, dthetas1, dthetas2, db
     for i in range(1):
         for j in range(1):
                 tmp = bias2[i][j]
+                print(bias2[i][j])
                 bias2[i][j] += ep
+                print(bias2[i][j])
                 res_plus = cost_fct_sbs1(X, Y, thetas1, thetas2, bias1, bias2, m)
                 bias2[i][j] = tmp
+                print(bias2[i][j])
                 tmp = bias2[i][j]
                 bias2[i][j] -= ep
+                print(bias2[i][j])
                 res_minus = cost_fct_sbs1(X, Y, thetas1, thetas2, bias1, bias2, m)
                 bias2[i][j] = tmp
                 bigthetas[k][0] = ((res_plus - res_minus) / ( 2 * ep))
@@ -293,10 +297,10 @@ def back_prop_sbs1(X, Y, thetas1, thetas2, bias1, bias2, m):
     dthetas2 = (((1 / m) * dthetas2))# + (0.0001 * thetas2))
     dbias1 = ((1 / m) * dbias1)
     dbias2 = ((1 / m) * dbias2)
-    thetas1 = (thetas1 - (0.0009 * dthetas1))
-    thetas2 = (thetas2 - (0.0009 * dthetas2))
-    bias1 = (bias1 - (0.0009 * dbias1))
-    bias2 = (bias2 - (0.0009 * dbias2))
+    thetas1 = (thetas1 - (0.009 * dthetas1))
+    thetas2 = (thetas2 - (0.009 * dthetas2))
+    bias1 = (bias1 - (0.009 * dbias1))
+    bias2 = (bias2 - (0.009 * dbias2))
     gradient_checkt(X, Y, thetas1, thetas2, bias1, bias2, dthetas1, dthetas2, bias1, bias2, 0.0000001, m)
     return (thetas1, thetas2, bias1, bias2)
 
