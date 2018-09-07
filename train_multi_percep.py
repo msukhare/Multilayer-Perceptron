@@ -6,7 +6,7 @@
 #    By: msukhare <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2018/08/06 16:36:59 by msukhare          #+#    #+#              #
-#    Updated: 2018/08/22 16:54:22 by msukhare         ###   ########.fr        #
+#    Updated: 2018/09/07 09:29:10 by msukhare         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -87,14 +87,14 @@ def dleaky_relu(z):
     return (z)
 
 def soft_max(z):
-    col = z.shape[1]
-    row = z.shape[0]
-    for j in range(int(col)):
-        sum = np.sum(np.exp(z[:, j]))
-        for i in range(int(row)):
-            z[i][j] = np.exp(z[i][j]) / sum
-    return (z)
-    #return (np.exp(z) / (np.sum(np.exp(z)) + np.sum(np.exp(z))))
+    #col = z.shape[1]
+    #row = z.shape[0]
+    #for j in range(int(col)):
+     #   sum = np.sum(np.exp(z[:, j]))
+      #  for i in range(int(row)):
+           # z[i][j] = np.exp(z[i][j]) / sum
+    #return (z)
+    return (np.exp(z) / (np.sum(np.exp(z))))
 
 def softmax(Z):
     x, y = np.shape(Z)
@@ -105,9 +105,19 @@ def softmax(Z):
             ret[j][i] = np.exp(Z[j][i]) / som
     return (ret)
 
+def cost_fct1(X, Y, w1, w2, w3, b1, b2, b3, m):
+    sum = 0
+    pred = forward_prop(X, w1, w2, w3, b1, b2, b3)
+    for i in range(int(m)):
+        if (Y[i] == 1):
+            sum += np.log(pred[0][i])
+        else:
+            sum += np.log(1 - pred[0][i])
+    return ((-(1 / m) * sum))
+
 def forward_prop(X, w1, w2, w3, b1, b2, b3):
-    l1 = tanh(w1.dot(X.transpose()) + b1)
-    l2 = tanh(w2.dot(l1) + b2)
+    l1 = leaky_relu(w1.dot(X.transpose()) + b1)
+    l2 = leaky_relu(w2.dot(l1) + b2)
     return (softmax((w3.dot(l2) + b3)))
 
 def back_prop(X, Y, w1, w2, w3, b1, b2, b3, m):
@@ -119,29 +129,23 @@ def back_prop(X, Y, w1, w2, w3, b1, b2, b3, m):
     #dl1 = ((w2.transpose().dot(dl2)) * (1 - (tanh(w1.dot(X.transpose()) + b1)**2)))
     #dw1 = ((1 / m) * dl1.dot(X))
     #db1 = ((1 / m) * np.sum(dl1, axis=1, keepdims=True))
-    l1 = tanh(w1.dot(X.transpose()) + b1)
-    l2 = tanh(w2.dot(l1) + b2)
+    l1 = leaky_relu(w1.dot(X.transpose()) + b1)
+    l2 = leaky_relu(w2.dot(l1) + b2)
     l3 = softmax((w3.dot(l2) + b3))
     dl3 = l3 - Y.transpose()
     dw3 = ((1 / m) * dl3.dot(l2.transpose()))
     db3 = ((1 / m) * np.sum(dl3, axis=1, keepdims=True))
-    dl2 = ((w3.transpose().dot(dl3)) * (1 - (tanh(w2.dot(l1)) + b2)**2))
+    dl2 = ((w3.transpose().dot(dl3)) * dleaky_relu((w2.dot(l1) + b2)))#(1 - (tanh(w2.dot(l1)) + b2)**2))
     dw2 = ((1 / m) * dl2.dot(l1.transpose()))
     db2 = ((1 / m) * np.sum(dl2, axis=1, keepdims=True))
-    dl1 = ((w2.transpose().dot(dl2)) * (1 - (tanh(w1.dot(X.transpose()) + b1)**2)))
+    dl1 = ((w2.transpose().dot(dl2)) * dleaky_relu((w1.dot(X.transpose()) + b1)))#(1 - (tanh(w1.dot(X.transpose()) + b1)**2)))
     dw1 = ((1 / m) * dl1.dot(X))
     db1 = ((1 / m) * np.sum(dl1, axis=1, keepdims=True))
     return (dw3, dw2, dw1, db3, db2, db1)
 
-def cost_fct1(X, Y, w1, w2, w3, b1, b2, b3, m):
-    sum = 0
-    pred = forward_prop(X, w1, w2, w3, b1, b2, b3)
-    for i in range(int(m)):
-        if (Y[i] == 1):
-            sum += np.log(pred[0][i])
-        else:
-            sum += np.log(1 - pred[0][i])
-    return ((-(1 / m) * sum))
+def forward_prop1(X, w1, w2, b1, b2):
+    l1 = leaky_relu(w1.dot(X.transpose()) + b1)
+    return (softmax((w2.dot(l1) + b2)))
 
 def back_prop1(X, Y, w1, w2, b1, b2, m):
     l1 = leaky_relu(w1.dot(X.transpose()) + b1)
@@ -154,21 +158,16 @@ def back_prop1(X, Y, w1, w2, b1, b2, m):
     db1 = ((1 / m) * np.sum(dl1, axis=1, keepdims=True))
     return (dw2, dw1, db2, db1)
 
-def forward_prop1(X, w1, w2, b1, b2):
-    l1 = leaky_relu(w1.dot(X.transpose()) + b1)
-    return (softmax((w2.dot(l1) + b2)))
-
 def cost_fct(X, Y, w1, w2, w3, b1, b2, b3, m):
     sum = 0
     pred = forward_prop(X, w1, w2, w3, b1, b2, b3)
     Y = Y.transpose()
     for i in range(int(m)):
-        for k in range(int(2)):
-            if (Y[k][i] == 1):
-                sum += np.log(pred[k][i])
-            else:
-                sum += np.log(1 - pred[k][i])
-    return ((-(1 / m) * sum))
+        if (Y[0][i] == 1):
+            sum += -np.log(pred[0][i])
+        else:
+            sum += -np.log(pred[1][i])
+    return (((1 / m) * sum))
 
 def gradient_check(X, Y, w1, w2, b1, b2, alpha, m):
     dw2, dw1, db2, db1 = back_prop1(X, Y, w1, w2, b1, b2, m)
@@ -256,14 +255,19 @@ def get_quality_classi(pred, Y):
     fp = 0
     fn = 0
     for i in range(int(pred.shape[0])):
-        if (pred[i][0] >= 0.5 and Y[i][0] == 1):
+        if (Y[i][0] == 1 and pred[i][0] > pred[i][1]):
             vp += 1
-        elif (pred[i][0] >= 0.5 and Y[i][0] == 0):
+        elif (Y[i][0] == 0 and pred[i][0] > pred[i][1]):
             fp += 1
-        elif (pred[i][0] < 0.5 and Y[i][0] == 0):
+        elif (Y[i][0] == 0 and pred[i][0] < pred[i][1]):
             vn += 1
-        elif (pred[i][0] < 0.5 and Y[i][0] == 1):
+        if (Y[i][0] == 1 and pred[i][0] < pred[i][1]):
             fn += 1
+        print("exemple == ", i)
+        print(Y[i])
+        print(pred[i])
+        print(vp, fp, vn, fn)
+        print("\n")
     print("accuracy:\n", ((vp + vn) / int(pred.shape[0])))
     precision = (vp / (vp + fp))
     recall = (vp / (vp + fn))
@@ -275,6 +279,16 @@ def get_quality_classi(pred, Y):
     print("false alarm rate:\n", (fp / (fp + vn)))
     print("miss rate:\n", (fn / (vp + fn)))
 
+def copy_and_replace(arr):
+    row, col = np.shape(arr)
+    for i in range(int(row)):
+        for j in range(int(col)):
+            if (arr[i][j] == 1):
+                arr[i][j] = 0
+            else:
+                arr[i][j] = 1
+    return (arr)
+
 def main():
     check_argv()
     data, Y = read_file()
@@ -283,35 +297,25 @@ def main():
     epsilon = 0.01
     X_train, X_cost = X[ : floor(m * 0.85)], X[floor(m * 0.85) :]
     Y_train, Y_cost = Y[ : floor(m * 0.85)], Y[floor(m * 0.85) :]
-    Y_train_opp = np.copy(Y_train)
-    Y_cost_opp = np.copy(Y_cost)
-    for i in range(int(Y_train_opp.shape[0])):
-        if (Y_train_opp[i][0] == 1):
-            Y_train_opp[i][0] = 0
-        else:
-            Y_train_opp[i][0] = 1
-    for i in range(int(Y_cost_opp.shape[0])):
-        if (Y_cost_opp[i][0] == 1):
-            Y_cost_opp[i][0] = 0
-        else:
-            Y_cost_opp[i][0] = 1
-    Y_cost = np.c_[Y_cost, Y_cost_opp]
-    Y_train = np.c_[Y_train, Y_train_opp]
+    Y_train_tmp = copy_and_replace(np.copy(Y_train))
+    Y_cost_tmp = copy_and_replace(np.copy(Y_cost))
+    Y_train = np.c_[Y_train, Y_train_tmp]
+    Y_cost = np.c_[Y_cost, Y_cost_tmp]
 #   thetas1 = (np.random.rand(36, X.shape[1]) * (2 * epsilon) - epsilon)
     w1 = (np.random.rand(36, X.shape[1]) * epsilon)
-   # w2 = (np.random.rand(2, 36) * epsilon)
+ #   w2 = (np.random.rand(2, 36) * epsilon)
     w2 = (np.random.rand(15, 36) * epsilon)
     w3 = (np.random.rand(2, 15) * epsilon)
     b1 = np.zeros((36, 1), dtype=float)
-  #  b2 = np.zeros((2, 1), dtype=float)
+   # b2 = np.zeros((2, 1), dtype=float)
     b2 = np.zeros((15, 1), dtype=float)
     b3 = np.zeros((2, 1), dtype=float)
     index = []
     res_cost = []
-    alpha = 0.002
-  #  gradient_check(X_train, Y_train, w1, w2, b1, b2, alpha, floor(0.85 * m))
+    alpha = 0.02
+   # gradient_check(X_train, Y_train, w1, w2, b1, b2, alpha, floor(0.85 * m))
    # sys.exit()
-    for i in range(2000):
+    for i in range(5000):
         dw3, dw2, dw1, db3, db2, db1 = back_prop(X_train, Y_train, w1, w2, w3, b1, b2, b3, floor(0.85 * m))
         w1 = w1 - (alpha * dw1)
         w2 = w2 - (alpha * dw2)
@@ -326,7 +330,6 @@ def main():
         res_cost.append(cost_fct(X_cost, Y_cost, w1, w2, w3, b1, b2, b3, floor(0.15 * m)))
     plt.plot(index, res_cost, color='red')
     plt.show()
-    print(Y_cost)
     pred = forward_prop(X_cost, w1, w2, w3, b1, b2, b3).transpose()
     for i in range(int(pred.shape[0])):
         print(pred[i][0], pred[i][1], Y_cost[i][0], Y_cost[i][1])
