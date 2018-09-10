@@ -6,7 +6,7 @@
 #    By: msukhare <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2018/09/07 11:18:12 by msukhare          #+#    #+#              #
-#    Updated: 2018/09/09 20:21:36 by kemar            ###   ########.fr        #
+#    Updated: 2018/09/10 16:26:33 by msukhare         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -72,11 +72,9 @@ def main():
     Y_train = np.c_[Y_train, Y_train_tmp]
     Y_cost = np.c_[Y_cost, Y_cost_tmp]
     neural_n = neural_network()
-    #pred = neural_n.forward_prop(X_cost)
-    #print((pred[neural_n.nb_layer]))
-    dw, dbias = neural_n.back_propagation(X_cost, Y_cost)
-    print(dw)
-    print(dbias)
+    neural_n.train_thetas(X_cost, Y_cost, X_train, Y_train)
+    pred = neural_n.forward_prop(X_cost)
+    print((pred[neural_n.nb_layer]))
 
 if __name__ == "__main__":
     main()

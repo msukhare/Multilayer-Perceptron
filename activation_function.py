@@ -1,3 +1,15 @@
+# **************************************************************************** #
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    activation_function.py                             :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: msukhare <marvin@42.fr>                    +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2018/09/10 16:34:09 by msukhare          #+#    #+#              #
+#    Updated: 2018/09/10 16:34:26 by msukhare         ###   ########.fr        #
+#                                                                              #
+# **************************************************************************** #
+
 import numpy as np
 
 def tanh(z):
@@ -23,7 +35,7 @@ def dleaky_relu(z):
     return (z)
 
 def softmax(z):
-    return (np.exp(z) / (np.sum(np.exp(z))))
+    return (np.exp(z) / (np.sum(np.exp(z), axis=0)))
 
 def sigmoid(z):
     return (1 / (1 + np.exp(-z)))
