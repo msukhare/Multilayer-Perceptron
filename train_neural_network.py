@@ -6,15 +6,18 @@
 #    By: msukhare <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2018/09/07 11:18:12 by msukhare          #+#    #+#              #
-#    Updated: 2018/09/10 16:26:33 by msukhare         ###   ########.fr        #
+#    Updated: 2018/09/16 13:40:52 by kemar            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 from neural_network import neural_network
+from metrics_for_binary_classification import metrics_for_binary_classification
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+from numpy.random import RandomState
 from math import floor
+import random
 import sys
 
 def check_argv():
@@ -30,7 +33,8 @@ def read_file():
         sys.exit("Fail to read file, make sure file exist")
     data.dropna(inplace=True)
     data = data.reset_index()
-    data = data.sample(frac=1).reset_index(drop=True)
+    seed_data = np.random.RandomState(8)
+    data = data.sample(frac=1, random_state=seed_data).reset_index(drop=True)
     data.drop(['index'], axis = 1, inplace = True)
     data['y'] = data['y'].map({'B' : 0, 'M' : 1})
     Y = data.iloc[:, 1:2]
@@ -59,6 +63,21 @@ def copy_and_replace(arr):
                 arr[i][j] = 1
     return (arr)
 
+###initialisation des thetas
+def create_w(nn):
+    w = []
+    w.append((np.random.rand(nn.nb_neurones[0], nn.nb_features) * nn.epsilon_rand))
+    for i in range(1, int(nn.nb_layer)):
+        w.append((np.random.rand(nn.nb_neurones[i], nn.nb_neurones[i - 1]) * nn.epsilon_rand))
+    return (w)
+
+def create_bias(nn):
+    bias = []
+    for i in range(int(nn.nb_layer)):
+        bias.append(np.zeros((nn.nb_neurones[i], 1), dtype=float))
+    return (bias)
+##Fin initialisation
+
 def main():
     check_argv()
     data, Y = read_file()
@@ -72,9 +91,24 @@ def main():
     Y_train = np.c_[Y_train, Y_train_tmp]
     Y_cost = np.c_[Y_cost, Y_cost_tmp]
     neural_n = neural_network()
-    neural_n.train_thetas(X_cost, Y_cost, X_train, Y_train)
-    pred = neural_n.forward_prop(X_cost)
-    print((pred[neural_n.nb_layer]))
+    metrics = metrics_for_binary_classification()
+    if (neural_n.nb_layer <= 0):
+        print("nb_layer must be > 0")
+    elif (neural_n.nb_layer != len(neural_n.nb_neurones)):
+        print("Dimension of nb_neurones must be equals to nb_layer")
+    elif (neural_n.nb_layer != len(neural_n.activate_func)):
+        print("Dimension of activation_func must be equals to nb_layer")
+    else:
+        np.random.seed(984)
+        neural_n.w = create_w(neural_n)
+        neural_n.bias = create_bias(neural_n)
+        #print(neural_n.gradient_checking(X_train, Y_train, 0.0000001))
+        neural_n.train_thetas(X_cost, Y_cost, X_train, Y_train)
+        layers = neural_n.forward_prop(X_cost)
+        pred = layers[neural_n.nb_layer].transpose()
+        metrics.confused_matrix_soft_max(pred, Y_cost, 1)
+        for i in range(int(floor(m * 0.15))):
+            print(pred[i][0], pred[i][1], Y_cost[i][0], Y_cost[i][1])
 
 if __name__ == "__main__":
     main()

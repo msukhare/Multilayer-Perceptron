@@ -6,7 +6,7 @@
 #    By: msukhare <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2018/08/06 16:36:59 by msukhare          #+#    #+#              #
-#    Updated: 2018/09/07 09:29:10 by msukhare         ###   ########.fr        #
+#    Updated: 2018/09/13 21:08:09 by kemar            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -227,7 +227,6 @@ def gradient_check(X, Y, w1, w2, b1, b2, alpha, m):
             b2[i][j] = tmp
             dapprox[k][0] = (plus - neg) / (2 * ep)
             k += 1
-    print(dapprox)
     sum1 = 0
     for i in range(int(dapprox.shape[0])):
         sum1 += (dapprox[i][0] - bigdwb[i][0])**2
