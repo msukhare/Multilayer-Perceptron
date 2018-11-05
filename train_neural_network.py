@@ -6,7 +6,7 @@
 #    By: msukhare <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2018/09/07 11:18:12 by msukhare          #+#    #+#              #
-#    Updated: 2018/09/16 13:40:52 by kemar            ###   ########.fr        #
+#    Updated: 2018/11/05 17:05:53 by msukhare         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -49,7 +49,7 @@ def scaling_feat(data):
     j = 0
     for key in data:
         for i in range(int(desc[key]['count'])):
-            X[i][j] = (X[i][j] - desc[key]['min']) / (desc[key]['max'] - desc[key]['min'])
+            X[i][j] = (X[i][j] - desc[key]['mean']) / (desc[key]['max'] - desc[key]['min'])
         j += 1
     return (X)
 
@@ -63,52 +63,26 @@ def copy_and_replace(arr):
                 arr[i][j] = 1
     return (arr)
 
-###initialisation des thetas
-def create_w(nn):
-    w = []
-    w.append((np.random.rand(nn.nb_neurones[0], nn.nb_features) * nn.epsilon_rand))
-    for i in range(1, int(nn.nb_layer)):
-        w.append((np.random.rand(nn.nb_neurones[i], nn.nb_neurones[i - 1]) * nn.epsilon_rand))
-    return (w)
-
-def create_bias(nn):
-    bias = []
-    for i in range(int(nn.nb_layer)):
-        bias.append(np.zeros((nn.nb_neurones[i], 1), dtype=float))
-    return (bias)
-##Fin initialisation
-
 def main():
     check_argv()
     data, Y = read_file()
     X = scaling_feat(data)
     m = X.shape[0]
-    epsilon = 0.01
-    X_train, X_cost = X[ : floor(m * 0.85)], X[floor(m * 0.85) :]
-    Y_train, Y_cost = Y[ : floor(m * 0.85)], Y[floor(m * 0.85) :]
+    X_train, X_cost = X[ : floor(m * 0.80)], X[floor(m * 0.80) :]
+    Y_train, Y_cost = Y[ : floor(m * 0.80)], Y[floor(m * 0.80) :]
     Y_train_tmp = copy_and_replace(np.copy(Y_train))
     Y_cost_tmp = copy_and_replace(np.copy(Y_cost))
     Y_train = np.c_[Y_train, Y_train_tmp]
     Y_cost = np.c_[Y_cost, Y_cost_tmp]
     neural_n = neural_network()
     metrics = metrics_for_binary_classification()
-    if (neural_n.nb_layer <= 0):
-        print("nb_layer must be > 0")
-    elif (neural_n.nb_layer != len(neural_n.nb_neurones)):
-        print("Dimension of nb_neurones must be equals to nb_layer")
-    elif (neural_n.nb_layer != len(neural_n.activate_func)):
-        print("Dimension of activation_func must be equals to nb_layer")
-    else:
-        np.random.seed(984)
-        neural_n.w = create_w(neural_n)
-        neural_n.bias = create_bias(neural_n)
-        #print(neural_n.gradient_checking(X_train, Y_train, 0.0000001))
-        neural_n.train_thetas(X_cost, Y_cost, X_train, Y_train)
-        layers = neural_n.forward_prop(X_cost)
-        pred = layers[neural_n.nb_layer].transpose()
-        metrics.confused_matrix_soft_max(pred, Y_cost, 1)
-        for i in range(int(floor(m * 0.15))):
-            print(pred[i][0], pred[i][1], Y_cost[i][0], Y_cost[i][1])
+    neural_n.initweight([30, 30, 30, 2], [11, 12, 10, 2], data.shape[1], 984, 4)
+    #print(neural_n.gradient_checking(X_train, Y_train, 0.0000001))
+    neural_n.train_thetas(X_cost, Y_cost, X_train, Y_train)
+    layers = neural_n.forward_prop(X_cost)
+    pred = layers[neural_n.nb_layer].transpose()
+    metrics.confused_matrix_soft_max(pred, Y_cost, 1)
+    neural_n.write_architecture()
 
 if __name__ == "__main__":
     main()

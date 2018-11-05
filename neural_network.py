@@ -6,7 +6,7 @@
 #    By: msukhare <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2018/09/07 09:18:00 by msukhare          #+#    #+#              #
-#    Updated: 2018/09/16 13:47:22 by kemar            ###   ########.fr        #
+#    Updated: 2018/11/05 17:05:46 by msukhare         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -25,15 +25,48 @@ def euclidien_distance(vec_dwb, dapprox):
 class neural_network:
 
     def __init__(self):
-        self.alpha = 0.02
-        self.epoch = 40000
+        self.alpha = 0.05
+        self.epoch = 3000
         self.epsilon_rand = 0.01
-        self.nb_layer = 4
-        self.nb_neurones = [36, 25, 15, 2]
-        self.activate_func = [12, 12, 12, 2] ##1 = sigmoid, 2 = softmax, 10 = tanh, 11 = relu, 12 = leaky_relu
+        self.nb_layer = 0
+        self.nb_neurones = []
+        self.activate_func = [] ##1 = sigmoid, 2 = softmax, 10 = tanh, 11 = relu, 12 = leaky_relu
         self.nb_features = 31
         self.w = []
         self.bias = []
+
+    def write_architecture(self):
+        with open("architecture_of_mlp.txt", "w") as file_to_write:
+            file_to_write.write(str(self.nb_layer))
+            file_to_write.write("\n")
+            file_to_write.write(str(self.nb_features))
+            file_to_write.write("\n")
+            for i in range(self.nb_layer):
+                file_to_write.write(str(self.nb_neurones[i]))
+                file_to_write.write(" ")
+            file_to_write.write("\n")
+            for i in range(self.nb_layer):
+                file_to_write.write(str(self.activate_func[i]))
+                file_to_write.write(" ")
+        with open("weight.npy", "wb") as file_to_write:
+            for i in range(self.nb_layer):
+                np.save(file_to_write, self.w[i])
+                np.save(file_to_write, self.bias[i])
+
+    def read_architecture(self):
+        with open("architecture_of_mlp.txt", "r") as file_to_read:
+             tmp = file_to_read.read().split("\n")
+             self.nb_layer = int(tmp[0])
+             self.nb_features = int(tmp[1])
+             tmp_nb_neurones = tmp[2].split(' ')
+             tmp_act_func = tmp[3].split(' ')
+             for i in range(self.nb_layer):
+                 self.nb_neurones.append(int(tmp_nb_neurones[i]))
+                 self.activate_func.append(int(tmp_act_func[i]))
+        with open("weight.npy", "rb") as file_to_read:
+            for i in range(self.nb_layer):
+                self.w.append(np.load(file_to_read))
+                self.bias.append(np.load(file_to_read))
 
     ##function for make predictions
     def forward_prop(self, X):
@@ -114,6 +147,32 @@ class neural_network:
         plt.plot(index, train, color='red')
         plt.plot(index, validation, color='green')
         plt.show()
+
+###initialisation des thetas
+    def create_w(self):
+        self.w.append((np.random.randint(-50, 50, (self.nb_neurones[0], self.nb_features)) * self.epsilon_rand))
+        for i in range(1, int(self.nb_layer)):
+            self.w.append((np.random.randint(-50, 50, (self.nb_neurones[i], self.nb_neurones[i - 1])) * self.epsilon_rand))
+
+    def create_bias(self):
+        for i in range(int(self.nb_layer)):
+            self.bias.append(np.zeros((self.nb_neurones[i], 1), dtype=float))
+
+    def initweight(self, nb_neurones, act_func, nb_features, random_seed, nb_layers):
+        if (len(nb_neurones) != len(act_func)):
+            sys.exit("nb_neurones must be the same size as act_func")
+        if (len(nb_neurones) != nb_layers):
+            sys.exit("nb_neurones must be the same size as nb_layers")
+        if (len(act_func) != nb_layers):
+            sys.exit("act_func must be the same size as nb_layers")
+        self.nb_layer = nb_layers
+        self.nb_neurones = nb_neurones
+        self.activate_func = act_func
+        self.nb_features = nb_features
+        np.random.seed(random_seed)
+        self.create_w()
+        self.create_bias()
+##Fin initialisation
 
 ###Gradient checking 
 ## Vectorize derivate of thetas and bias
