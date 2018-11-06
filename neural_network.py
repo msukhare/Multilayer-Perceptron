@@ -6,7 +6,7 @@
 #    By: msukhare <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2018/09/07 09:18:00 by msukhare          #+#    #+#              #
-#    Updated: 2018/11/06 15:24:49 by msukhare         ###   ########.fr        #
+#    Updated: 2018/11/06 16:01:17 by msukhare         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -146,6 +146,7 @@ class neural_network:
             train.append(self.cost_function(Y_train.transpose(),\
                     self.forward_prop(X_train), m))
             index.append(i)
+            print("nb_epoch:", index[i], ", train_loss:", train[i], "- val_loss:", validation[i])
         plt.plot(index, train, color='red')
         plt.plot(index, validation, color='green')
         plt.show()
