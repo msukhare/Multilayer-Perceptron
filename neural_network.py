@@ -6,7 +6,7 @@
 #    By: msukhare <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2018/09/07 09:18:00 by msukhare          #+#    #+#              #
-#    Updated: 2018/11/05 17:05:46 by msukhare         ###   ########.fr        #
+#    Updated: 2018/11/06 15:24:49 by msukhare         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -14,6 +14,7 @@ import numpy as np
 from activation_function import activate_layer
 from activation_function import deri_func
 import matplotlib.pyplot as plt
+import sys
 
 ##euclidien distance
 def euclidien_distance(vec_dwb, dapprox):
@@ -24,9 +25,10 @@ def euclidien_distance(vec_dwb, dapprox):
 
 class neural_network:
 
+#492, 0.05 alpha == 98,24% accu
     def __init__(self):
         self.alpha = 0.05
-        self.epoch = 3000
+        self.epoch = 500
         self.epsilon_rand = 0.01
         self.nb_layer = 0
         self.nb_neurones = []
@@ -150,9 +152,11 @@ class neural_network:
 
 ###initialisation des thetas
     def create_w(self):
-        self.w.append((np.random.randint(-50, 50, (self.nb_neurones[0], self.nb_features)) * self.epsilon_rand))
+       # self.w.append((np.random.randint(-50, 50, (self.nb_neurones[0], self.nb_features)) * self.epsilon_rand))
+        self.w.append(np.random.rand(self.nb_neurones[0], self.nb_features) * 0.1)
         for i in range(1, int(self.nb_layer)):
-            self.w.append((np.random.randint(-50, 50, (self.nb_neurones[i], self.nb_neurones[i - 1])) * self.epsilon_rand))
+            #self.w.append((np.random.randint(-50, 50, (self.nb_neurones[i], self.nb_neurones[i - 1])) * self.epsilon_rand))
+            self.w.append(np.random.rand(self.nb_neurones[i], self.nb_neurones[i - 1]) * 0.1)
 
     def create_bias(self):
         for i in range(int(self.nb_layer)):
