@@ -6,12 +6,12 @@
 #    By: msukhare <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2018/09/07 11:18:12 by msukhare          #+#    #+#              #
-#    Updated: 2018/11/06 15:24:50 by msukhare         ###   ########.fr        #
+#    Updated: 2018/11/09 23:35:03 by msukhare         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-from neural_network import neural_network
-from metrics_for_binary_classification import metrics_for_binary_classification
+from neural_network import NeuralNetwork
+from metrics_for_binary_classification import MetricsForBinaryClassification
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
@@ -73,14 +73,14 @@ def main():
     Y_cost_tmp = copy_and_replace(np.copy(Y_cost))
     Y_train = np.c_[Y_train_tmp, Y_train]
     Y_cost = np.c_[Y_cost_tmp, Y_cost]
-    neural_n = neural_network()
-    metrics = metrics_for_binary_classification()
+    neural_n = NeuralNetwork()
+    metrics = MetricsForBinaryClassification()
     neural_n.initweight([30, 25, 15, 10, 2], [11, 11, 11, 11, 2], data.shape[1], 984, 5)
     #print(neural_n.gradient_checking(X_train, Y_train, 0.0000001))
     neural_n.train_thetas(X_cost, Y_cost, X_train, Y_train)
     layers = neural_n.forward_prop(X_cost)
     pred = layers[neural_n.nb_layer].transpose()
-    metrics.confused_matrix_soft_max(pred, Y_cost, 1)
+    metrics.confusion_matrix_soft_max(pred, Y_cost, 1)
     neural_n.write_architecture()
 
 if __name__ == "__main__":

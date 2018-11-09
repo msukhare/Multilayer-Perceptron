@@ -6,7 +6,7 @@
 #    By: msukhare <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2018/09/07 09:18:00 by msukhare          #+#    #+#              #
-#    Updated: 2018/11/06 16:01:17 by msukhare         ###   ########.fr        #
+#    Updated: 2018/11/09 23:35:01 by msukhare         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -23,7 +23,7 @@ def euclidien_distance(vec_dwb, dapprox):
             np.sqrt(np.sum((vec_dwb**2), axis=0)))))
 
 
-class neural_network:
+class NeuralNetwork:
 
 #492, 0.05 alpha == 98,24% accu
     def __init__(self):

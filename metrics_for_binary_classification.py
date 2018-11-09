@@ -1,4 +1,16 @@
-class metrics_for_binary_classification:
+# **************************************************************************** #
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    metrics_for_binary_classification.py               :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: msukhare <marvin@42.fr>                    +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2018/11/09 23:33:20 by msukhare          #+#    #+#              #
+#    Updated: 2018/11/09 23:35:00 by msukhare         ###   ########.fr        #
+#                                                                              #
+# **************************************************************************** #
+
+class MetricsForBinaryClassification:
 
     def __init__(self):
         self.tp = 0
@@ -7,7 +19,7 @@ class metrics_for_binary_classification:
         self.fn = 0
 
     ## Y == class, pred == prediction make by classification, them shape == (nb_exemple, nb_class)
-    def confused_matrix_soft_max(self, pred, Y, put_metrics):
+    def confusion_matrix_soft_max(self, pred, Y, put_metrics):
         for i in range(int(Y.shape[0])):
             if (Y[i][0] == 1 and pred[i][0] > pred[i][1]):
                 self.tp += 1
