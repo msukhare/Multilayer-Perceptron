@@ -6,13 +6,13 @@
 #    By: msukhare <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2018/11/05 13:49:41 by msukhare          #+#    #+#              #
-#    Updated: 2018/11/06 15:24:48 by msukhare         ###   ########.fr        #
+#    Updated: 2018/11/10 03:08:51 by msukhare         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 import numpy as np
 import pandas as pd
-from neural_network import neural_network
+from neural_network import NeuralNetwork
 import sys
 import csv
 
@@ -56,7 +56,7 @@ def main():
     if (len(sys.argv) >= 3):
         sys.exit("too much file")
     X = read_file()
-    neural_n = neural_network()
+    neural_n = NeuralNetwork()
     neural_n.read_architecture()
     if (X.shape[1] < neural_n.nb_features):
         sys.exit("need more features")
