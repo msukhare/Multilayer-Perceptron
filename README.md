@@ -4,13 +4,13 @@
 
 * Multilayer-Perceptron is a machine learning project. The goal of this project is to do an Artificial Neural Network from scratch.
 
-* Multilayer-Perceptron is composed of two scripts, `train_neural_network.py`, `use_neural_network.py` and 2 classes `NeuralNetwork`, `metrics_for_binary_classification.py`.
+* Multilayer-Perceptron is composed of two scripts, `train_neural_network.py`, `use_neural_network.py` and 2 classes `NeuralNetwork`, `MetricsForBinaryClassification`.
 
 ### About `train_neural_network.py`:
 
 * `train_neural_network.py` creates an instance of class `NeuralNetwork` and calls `train_thetas` method to train weight.
 
-* `train_neural_network.py` creates an instance of class 'metrics_for_binary_classification` and calls `confusion_matrix_softmax` to get metrics.
+* `train_neural_network.py` creates an instance of class `MetricsForBinaryClassification` and calls `confusion_matrix_softmax` to get metrics.
 
 * This script writes architecture (number of layers, number of features in data, number of neurons per layers, activation function for each layers) of neural_network in `architecture_of_mlp.txt` and weights in `weight.npy`(serialized matrix).
 
