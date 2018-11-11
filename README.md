@@ -2,7 +2,7 @@
 
 ## About Multilayer-Perceptron:
 
-* Multilayer-Perceptron is a machine learning project. The goal of this project is to do an Artificial Neural Network from scratch.
+* Multilayer-Perceptron is a machine learning project. The goal of this project is to do an Artificial Neural Networks from scratch.
 
 * Multilayer-Perceptron is composed of two scripts, `train_neural_network.py`, `use_neural_network.py` and 2 classes `NeuralNetwork`, `MetricsForBinaryClassification`.
 
