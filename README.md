@@ -8,7 +8,7 @@
 
 ### About `train_neural_network.py`:
 
-* `train_neural_network.py` creates an instance of class `NeuralNetwork` and calls `train_thetas` method to train weight.
+* `train_neural_network.py` creates an instance of class `NeuralNetwork` and calls `train_thetas` method to train weights.
 
 * `train_neural_network.py` creates an instance of class `MetricsForBinaryClassification` and calls `confusion_matrix_softmax` to get metrics.
 
