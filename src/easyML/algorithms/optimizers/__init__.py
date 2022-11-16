@@ -1,0 +1,2 @@
+from .gradient_descent_optim import gradient_descent, compute_dweights
+from .normal_equation_linear_reg import normal_equation
