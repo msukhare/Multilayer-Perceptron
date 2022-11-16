@@ -1,4 +1,5 @@
 from .algorithms import LinearReg,\
-                        LogisticReg
+                        LogisticReg,\
+                        MLP
 from .data_managment import scaling_features,\
                             split_data
