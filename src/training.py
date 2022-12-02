@@ -29,6 +29,7 @@ def main(args):
                         args.precision,\
                         args.recall,\
                         args.f1_score)
+    classificator.fit(X, Y)
     try:
         classificator.fit(X, Y)
     except Exception as error:
